@@ -1,0 +1,321 @@
+<script>
+	$( function() {
+    
+    var hCubes = [];
+    var vCubes = [];
+    var idNum = 0;
+    var testing = false;
+    var snap = true;
+    var erasing = false;
+    resizeItems();
+    var activeChip = "";
+    
+    $(window).on('resize', function(){
+      resizeItems();
+    });
+    
+    function resizeItems(){
+       // first remove ugly colors to save space
+       if(($(window).width() < 800)){
+          $('.shrink').hide();
+       } else{
+          $('.shrink').show();
+       }
+       
+       if($(window).width() < 600){
+          $('#box').css("width",$(window).width()-60);
+          $('#hor-cubes').children().addClass("small");
+          $('#ver-cubes').children().addClass("small");
+          $('#box').children().addClass("small");
+       } else{
+          $('#box').css("width",$(window).width()-85);
+          $('#hor-cubes').children().removeClass("small");
+          $('#ver-cubes').children().removeClass("small");
+          $('#box').children().removeClass("small");
+       }
+    }
+    
+    $(".draggable").draggable({
+       revert: 'invalid',
+       appendTo: '#box',
+       scroll: false
+    });
+       
+    $(".in-menu").each( function(elem) {
+       $(this).draggable("option", "helper", 'clone');
+
+       // can't use .width() and .height() before images load
+       var width = parseInt($(this).css('width'));
+       var height = parseInt($(this).css('height'));
+       $(this).draggable("option", "cursorAt",{'top': height/2, 'left': width/2});
+    });
+
+    $(".in-menu").on("click",function(event) {
+              
+         resetPointer();
+         // reset activeChip to be the new chip that was clicked on
+         activeChip = $(this).attr('id'); 
+
+         $(this).addClass('selected');
+
+    });
+    
+    $( "#box" ).droppable({
+      drop: function(event, ui) {
+          var clone = cloneChip(ui.draggable,this,0);   
+          //clone.on("click",chipClick);
+          clone.on("click",function(event) {
+              event.stopPropagation();
+              resetPointer();
+
+
+             if(erasing){
+            
+             if($(this).hasClass('vertical')){
+                  removeItemFromArray($(this).attr('id'),vCubes);
+              }
+             else{
+                  removeItemFromArray($(this).attr('id'),hCubes);
+             }
+       
+             $(this).remove();
+            }
+            else{
+            
+              // reset activeChip to be the new chip that was clicked on
+              activeChip = $(this).attr('id'); 
+              $(this).addClass('selected');
+                
+            }
+          });
+       }
+    });
+    
+    
+    $( "#box" ).on("click",createByClick);
+    
+    
+    function createByClick(){
+    
+        if(activeChip != ""){
+          var clone = cloneChip(activeChip,this,0); 
+          clone.on("click",function(event) {
+              event.stopPropagation();
+              resetPointer();
+              
+
+             if(erasing){
+            
+             if($(this).hasClass('vertical')){
+                  removeItemFromArray($(this).attr('id'),vCubes);
+              }
+             else{
+                  removeItemFromArray($(this).attr('id'),hCubes);
+             }
+       
+             $(this).remove();
+            }
+            else{
+                
+              // reset activeChip to be the new chip that was clicked on
+              activeChip = $(this).attr('id'); 
+
+             $(this).addClass('selected');
+            
+            }
+          });
+        }
+    }
+    
+    function cloneChip(sourceChip,div,change){
+        
+        if((typeof sourceChip) == "string"){  sourceChip = $("#"+sourceChip); }
+        
+        var clone = sourceChip.clone();
+        clone.removeClass('selected');
+        // remove padding
+        clone.css("padding",0);
+        //clone.css("margin","0 0 0 0");
+        clone.css("position","absolute"); // they start off as relative. leaving them as relative moves them around when one is moved
+        
+        // make sure you append to the div BEFORE finding the width and height
+        clone.appendTo( div );
+        
+        var width = parseInt(clone.width());
+        var height = parseInt(clone.height());
+        
+        //alert("Height: "+height+", Width: "+width);
+        
+        if(sourceChip.hasClass("in-menu")){ 
+           idNum++;
+           if(sourceChip.hasClass("vertical")){
+              vCubes.push('cube-'+idNum);
+           }
+           else{
+              hCubes.push('cube-'+idNum);
+           }
+           
+           clone.attr('id','cube-'+idNum);
+           
+           // reset the eraser if dragging in new tiles from menu
+           resetEraser();
+        } 
+        else{
+           // remove previous location of chip
+           sourceChip.remove(); 
+        }
+        
+        clone.removeClass("in-menu"); 
+        clone.addClass("clone"); 
+        clone.css("left", "");
+        
+        clone.draggable({
+           revert: 'invalid',
+           appendTo: '#box',
+           scroll: false
+         }); // make the clone a draggable object
+        
+        // this allows for accuracy in the new dropped location when a new chip is moved around (doesn't "snap" to a grid, drops exactly where it was)
+        clone.draggable("option", "cursorAt",{'top': height/2, 'left': width/2});
+        
+        clone.offset({'top':event.pageY-height/2 , 'left':event.pageX-width/2+change });
+        
+       if(snap){
+        if(clone.hasClass('vertical')){
+        
+           for(var i = 0; i < vCubes.length; i++){
+               if(checkCollisions( clone.attr('id'), vCubes[i])){
+                   // reposition
+                   clone.offset({'top': $('#'+vCubes[i]).offset().top-($('#'+vCubes[i]).height()*(5/6))});
+                   clone.offset({'left': $('#'+vCubes[i]).offset().left});
+                   // break out of for loop
+                   i = vCubes.length+2;
+               }
+           }
+        
+        }
+        else{
+           
+           for(var i = 0; i < hCubes.length; i++){
+               if(checkCollisions( clone.attr('id'), hCubes[i])){
+                   // reposition
+                   clone.offset({'left': $('#'+hCubes[i]).offset().left+($('#'+hCubes[i]).width()*(5/6))});
+                   clone.offset({'top': $('#'+hCubes[i]).offset().top});
+                   // break out of for loop
+                   i = hCubes.length+2;
+               }
+           }
+           
+        }
+       } 
+        
+        // for testing
+        if(testing){$('#message').html("Vertical cubes: "+vCubes+", Horizontal chips: "+hCubes);}
+        return clone;
+         
+    }
+    
+    function removeItemFromArray(item,array){
+       var index = array.indexOf(item);
+       if (index > -1) {
+          array.splice(index, 1);
+       }
+       return array;
+    }
+    
+    function getPositions(item) {
+       var element = $('#'+item);
+       var pos = element.position();
+       var width = element.width();
+       var height = element.height();
+       return [ [ pos.left, pos.left + width ], [ pos.top, pos.top + height ] ];
+    }
+    
+    function comparePositions(p1, p2) {
+       var x1 = p1[0] < p2[0] ? p1 : p2;
+       var x2 = p1[0] < p2[0] ? p2 : p1;
+       return x1[1] > x2[0] || x1[0] === x2[0] ? true : false;
+     }
+
+     function checkCollisions(cube1,cube2){
+       if(cube1 == cube2){ return false; }
+       // for some reason, this is necessary sometimes the whole thing doesn't work 
+       // I believe the error was with the reset not resetting the arrays so this shouldn't be needed
+       //if((cube1 != null) && (cube2 != null)){
+       
+          var pos = getPositions(cube1);
+          var pos2 = getPositions(cube2);
+          var horizontalMatch = comparePositions(pos[0], pos2[0]);
+          var verticalMatch = comparePositions(pos[1], pos2[1]);   
+          return horizontalMatch && verticalMatch;
+       
+       //} else { return false; }
+     }
+    
+    function resetPointer(){
+    
+         // remove selected from all items
+         $('.cube-wrapper').removeClass('selected');
+         $('.v-cube-wrapper').removeClass('selected');
+         
+    }
+    
+    function resetEraser(){
+    
+         // reset erasing
+         $('#erase').css("background-color","white");
+         $('#erase').css("color","black");
+         $('.eraserPic').attr("fill", "white");
+         $('.eraserPic').attr("stroke", "black");
+         $('.clone .cube').css('cursor','');
+         $('.clone .cube-lines').css('cursor','');
+         $('.clone .cube-side').css('cursor','');
+         $('.clone .cube-side-lines').css('cursor','');
+         $('.clone .cube-v-lines').css('cursor','');
+         $('.clone .cube-v-side').css('cursor','');
+         $('.clone .cube-v-side-lines').css('cursor','');
+         erasing = false;
+         
+    }
+    
+    $('#reset').click(function() {
+    
+         // NOTE - alert confirmation message does not work when embedded in Google sites
+         $('.clone').remove();
+         hCubes = [];
+         vCubes = [];
+         resetEraser();
+         resetPointer();
+         activeChip = "";
+        
+    });
+    
+    $('#erase').click(function() {
+         
+         // turn on erasing
+         if(erasing == false){
+            resetPointer();
+            activeChip = "";
+            $('#erase').css("background-color","#1F1F69");
+            $('#erase').css("color","white");
+            $('.eraserPic').attr("fill", "#1F1F69");
+            $('.eraserPic').attr("stroke", "white");
+            $('.clone .cube').css('cursor','crosshair');
+            $('.clone .cube-lines').css('cursor','crosshair');
+            $('.clone .cube-side').css('cursor','crosshair');
+            $('.clone .cube-side-lines').css('cursor','crosshair');
+            $('.clone .cube-v-lines').css('cursor','crosshair');
+            $('.clone .cube-v-side').css('cursor','crosshair');
+            $('.clone .cube-v-side-lines').css('cursor','crosshair');
+            erasing = true;
+         }
+        
+         // turn off erasing
+         else {
+            resetEraser();
+         }
+         
+    });
+    
+  } );
+</script>

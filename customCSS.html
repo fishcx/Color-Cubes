@@ -1,0 +1,247 @@
+<style>
+  html { 
+     height: 100%; 
+     width: 100%; 
+     margin: 0; 
+  }
+  body { 
+     height: 100%; 
+     width: 100%; 
+     margin: 0; 
+  }
+  #reset{
+     position: absolute;
+     right: 10px;
+  }
+  .button{
+     position:absolute;
+     border-style: solid;
+     padding:5px;
+     border-width: medium;
+     cursor: pointer;
+     border-color: #1F1F69;
+  }
+  #items-top{
+     width:100%; 
+     float: left; 
+  }
+  #items-left{
+     width:70px; 
+     float: left; 
+  }
+  #box{
+     position: absolute;
+     padding: 0.5em; 
+     float: left; 
+     margin: 10px 10px 10px 0; 
+     border-width: thick; 
+     border-color: #1F1F69;
+  }
+  .small{
+     transform: scale(0.9);
+  }
+  .cube-wrapper{
+     display: inline-block;
+     position:relative;
+     width:60px;
+     height:50px;
+    /* border-width:1px;
+     border-color:black;
+     border-style:solid;*/
+  }
+  .v-cube-wrapper{
+     display: inline-block;
+     position:relative;
+     width:50px;
+     height:60px;
+ /* border-width:1px;
+     border-color:black;
+     border-style:solid;*/
+  }
+  .cube{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    border-radius: 5px;
+    bottom: 0px;
+  }
+  .cube-lines{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    left:3px;
+    top:5px;
+    height: 40px;
+    width: 43px;
+    border-right: 1.75px solid white;
+    border-left: 1.75px solid gray;
+  }
+  .cube-side{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    height: 40px;
+    width: 12px;
+    border-radius: 3px;
+    left:47px;
+    top:5px;
+  }
+  .cube-side-lines{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    left:47px;
+    top:10px;
+    height: 30px;
+    width: 11px;
+    border-right: 1.75px solid #f2ebeb;
+  }
+  .cube-v-lines{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    bottom:3px;
+    left:5px;
+    height: 43px;
+    width: 40px;
+    border-top: 1.75px solid white;
+    border-bottom: 1.75px solid gray;
+  }
+  .cube-v-side{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    height: 12px;
+    width: 40px;
+    border-radius: 3px;
+    bottom:47px;
+    left:5px;
+  }
+  .cube-v-side-lines{
+    cursor: grab;
+    position: absolute;
+    display: inline-block;
+    bottom:47px;
+    left:10px;
+    height: 11px;
+    width: 30px;
+    border-top: 1.75px solid #f2ebeb;
+  }
+  .red{
+     background-color: #D12235 !important;
+  }
+  .orange{
+     background-color: #EA5F13 !important;
+  }
+  .yellow{
+     background-color: #FAE100 !important;
+  }
+  .green{
+     background-color: #6BB434 !important;
+  }
+  .blue {
+     background-color: #195394 !important;
+  }
+  .purple{
+     background-color: #8E1E76 !important;
+  }
+  .brown{
+     background-color: #822E00 !important;
+  }
+  .gray{
+     background-color: #b9bdc4 !important;
+  }
+  .black{
+     background-color: #000000 !important;
+  }
+  
+   .selected{
+     box-shadow: 0 0 0 3px #4242f5;
+  }
+  /* If the screen size is 601px wide or more */
+@media screen and (min-width: 601px) {
+  #items-top{
+     height: 70px; 
+  }
+  #erase{
+     left:20px;
+  }
+  #hor-cubes{
+     position:absolute;
+     display: inline-block;
+     left:85px;
+     top:20px;
+     height:50px;
+  }
+  .cube-wrapper{
+     margin-right: 10px;
+  }
+  .vertical{
+     /* transform: rotate(270deg); */
+     margin-bottom: 5px;
+  }
+  #ver-cubes{
+     position:absolute;
+     display: inline-block;
+     left:15px;
+     top:90px;
+     width:70px;
+     height:700px;
+  }
+  #box{
+     top: 70px;
+     left: 85px;
+     height: 700px; 
+  }
+  .button{
+     position:absolute;
+     top:20px;
+  }
+}
+
+/* If the screen size is 600px wide or less */
+@media screen and (max-width: 600px) {
+  #items-top{
+     height: 50px; 
+  }
+  #erase{
+     left:10px;
+  }
+  #hor-cubes{
+     position:absolute;
+     display: inline-block;
+     left:60px;
+     top:10px;
+     height:50px;
+  }
+  .cube-wrapper{
+     margin-right: -5px;
+  }
+  .vertical{
+     /* transform: rotate(270deg); */
+     margin-bottom: 0px;
+  }
+  #ver-cubes{
+     position:absolute;
+     display: inline-block;
+     left:10px;
+     top:70px;
+     width:70px;
+     height:700px;
+  }
+  
+  #box{
+     top: 50px;
+     left: 60px;
+     height: 400px; 
+  }
+  #items-left{
+     top:65px;
+  }
+  .button{
+     top:10px;
+  }
+}
+</style>
